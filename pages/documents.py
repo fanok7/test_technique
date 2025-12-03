@@ -9,12 +9,10 @@ import random
 
 # Dossiers
 DOC_DIR = "data/documents"
-DB_PATH = "data/vectordb"
-# Générer une clé unique à chaque rerun pour "vider" le file_uploader
-uploader_key = f"file_uploader_{random.randint(0, 999999)}"
+
 # Titre de la page
 st.title("Gestion des documents juridiques")
-st.markdown("**gérer** vos fichiers internes (upload et suppression)")
+st.markdown("**Gérer** vos fichiers internes (upload et suppression)")
 
 # Charger la base vectorielle
 vectordb = get_vectordb()
