@@ -1,3 +1,7 @@
+"""
+Page pour la gestion des documents juridiques - Deuxième Page
+"""
+
 import os
 import streamlit as st
 from utils.documents_manager import delete_documents, upload_documents, get_vectordb  # import de get_vectordb
@@ -15,10 +19,10 @@ st.markdown("**gérer** vos fichiers internes (upload et suppression)")
 # Charger la base vectorielle
 vectordb = get_vectordb()
 
-# Upload d’un document
+# Upload d’un ou plusieurs documents
 uploaded = st.file_uploader("Uploader un fichier (.txt, .csv, .html)", type=["txt","csv","html"], accept_multiple_files=True)
 if uploaded:
-    upload_documents(uploaded, vectordb)# passer vectordb ici
+    upload_documents(uploaded, vectordb)
 
 # Liste des documents existants
 st.subheader("Documents existants")

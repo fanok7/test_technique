@@ -1,3 +1,7 @@
+"""
+Gestion des documents et de la base vectorielle pour le chatbot juridique
+"""
+
 import os
 import logging
 import pandas as pd
@@ -8,6 +12,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from dotenv import load_dotenv
 
+# Chargement des variables d'environnement
 load_dotenv()
 
 # Dossiers

@@ -1,22 +1,22 @@
+"""
+Création de la chaîne RAG (Retrieval-Augmented Generation) pour l'assistant juridique
+"""
 
-# Import des modules nécessaires pour LangChain, embeddings et gestion des variables d'environnement
-from langchain_community.vectorstores import Chroma           # Base vectorielle pour stocker et rechercher les embeddings
-from langchain_openai import ChatOpenAI                        # Wrapper LangChain pour utiliser GPT
-from langchain_core.runnables import RunnablePassthrough       # Passe la donnée telle quelle
-from langchain_core.output_parsers import StrOutputParser      # Transforme la sortie GPT en texte simple
-from langchain_core.prompts.chat import ChatPromptTemplate     # Pour créer des prompts dynamiques
-from langchain_openai import OpenAIEmbeddings                  # Pour générer les embeddings avec OpenAI
+from langchain_community.vectorstores import Chroma          
+from langchain_openai import ChatOpenAI                       
+from langchain_core.runnables import RunnablePassthrough       
+from langchain_core.output_parsers import StrOutputParser     
+from langchain_core.prompts.chat import ChatPromptTemplate     
+from langchain_openai import OpenAIEmbeddings                  
 from dotenv import load_dotenv
 
-# Chargement des variables d'environnement (ex : OPENAI_API_KEY)
+# Chargement des variables d'environnement
 load_dotenv()
 
 def load_rag_chain(db_path="data/vectordb"):
     # Création du modèle d'embeddings
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     # Création du retriever Chroma
-    # Va chercher les chunks les plus pertinents depuis la base vectorielle
-    # k=4 signifie qu'on récupère les 4 meilleurs chunks pour chaque question
     retriever = Chroma(persist_directory=db_path,embedding_function=embeddings).as_retriever(search_kwargs={"k": 4})
     # Définition du template de prompt pour le LLM
     template = """Tu es un assistant juridique. Répond à la QUESTION uniquement selon le CONTEXTE.

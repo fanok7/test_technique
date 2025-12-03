@@ -1,3 +1,7 @@
+"""
+Programme principal et chatbot RAG - Première page
+"""
+
 import streamlit as st
 import os
 from utils.documents_manager import get_vectordb, vectorize_all_documents
@@ -10,7 +14,7 @@ load_dotenv()
 vectordb = get_vectordb()                   # Charge ou crée la base vectorielle
 vectorize_all_documents(vectordb)           # Vectorise automatiquement les nouveaux documents
 
-
+# Titre de la page
 st.title("Collaborateur IA juridique interne")
 
 # Historique du chat
@@ -19,7 +23,7 @@ if "chat_history" not in st.session_state:
 
 st.markdown("Poser des **questions** au chatbot basé sur vos documents internes")
 
-# Créer la chaîne RAG
+# Création de la chaîne RAG
 chain = load_rag_chain(db_path="data/vectordb")
 # Entrée utilisateur
 question = st.text_input("Posez votre question :")
@@ -35,7 +39,7 @@ for q, r in st.session_state.chat_history:
     st.markdown(f"**Vous :** {q}")
     st.markdown(f"**Assistant IA :** {r}")
 
-# Bouton pour réinitialiser la conversation
+# Bouton pour réinitialiser l'historique de conversation
 if st.button("Effacer l'historique de conversation"):
     st.session_state.chat_history = []
     st.experimental_rerun()
