@@ -26,7 +26,7 @@ vectorize_all_documents(vectordb)
 
 # Titre de la page
 st.title("💼 Collaborateur Juridique RAG")
-st.markdown("Poser des questions au chatbot basé sur les documents internes.")
+st.markdown("Poser des questions au chatbot basé sur les documents internes")
 
 # Initialisation de l'historique
 if "chat_history" not in st.session_state:
