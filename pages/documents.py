@@ -25,7 +25,7 @@ if "docs" not in st.session_state:
     st.session_state.docs = os.listdir(DOC_DIR)
 
 # Bouton-drag pour upload des documents
-st.subheader("📤 Upload des documents")
+st.subheader("📤 Uploader des documents")
 # Initialisation du compteur pour uploader
 if "uploader_counter" not in st.session_state:
     st.session_state.uploader_counter = 0
