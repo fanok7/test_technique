@@ -23,10 +23,10 @@ st.set_page_config(
 vectordb = get_vectordb()    
 # Vectorise automatiquement les nouveaux documents
 vectorize_all_documents(vectordb)    
-       
+
 # Titre de la page
 st.title("💼 Collaborateur Juridique RAG")
-st.markdown("Posez des **questions** au chatbot basé sur vos documents internes")
+st.markdown("Poser des questions au chatbot basé sur les documents internes.")
 
 # Initialisation de l'historique
 if "chat_history" not in st.session_state:

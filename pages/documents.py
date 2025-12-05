@@ -15,7 +15,7 @@ st.set_page_config(page_title="Gestion des Documents", layout="wide")
 
 # Titre et description de la page
 st.title("📁 Gestionnaire de documents")
-st.markdown("Uploader, lister et supprimer vos documents à la base de données internes.")
+st.markdown("Uploader, lister et supprimer des documents dans la base de données interne")
 
 # Charger ou créer la base vectorielle
 vectordb = get_vectordb()
