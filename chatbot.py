@@ -46,7 +46,7 @@ if prompt := st.chat_input("Posez votre question..."):
     st.session_state.chat_history.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
     # Générer la réponse
-    with st.spinner("L'IA réfléchit..."):
+    with st.spinner("L'assistant cherche..."):
         response = chain.invoke(prompt)
     # Ajouter réponse à l'historique
     st.session_state.chat_history.append({"role": "assistant", "content": response})
