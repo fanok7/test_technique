@@ -11,36 +11,48 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement
 load_dotenv()
 
-vectordb = get_vectordb()                   # Charge ou crée la base vectorielle
-vectorize_all_documents(vectordb)           # Vectorise automatiquement les nouveaux documents
+# Configuration de la page (doit être la première commande Streamlit)
+st.set_page_config(
+    page_title="Collaborateur IA Juridique",
+    page_icon="⚖️",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
+# Charge ou crée la base vectorielle
+vectordb = get_vectordb()    
+# Vectorise automatiquement les nouveaux documents
+vectorize_all_documents(vectordb)    
+       
 # Titre de la page
-st.title("Collaborateur IA juridique interne")
+st.title("💼 Collaborateur Juridique RAG")
+st.markdown("Posez des **questions** au chatbot basé sur vos documents internes")
 
-# Historique du chat
+# Initialisation de l'historique
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-st.markdown("Poser des **questions** au chatbot basé sur vos documents internes")
-
-# Création de la chaîne RAG
+# Charger la chaîne RAG
 chain = load_rag_chain(db_path="data/vectordb")
+
+# Affichage de l'historique
+for msg in st.session_state.chat_history:
+    role, content = msg["role"], msg["content"]
+    st.chat_message(role).write(content)
+
 # Entrée utilisateur
-question = st.text_input("Posez votre question :")
-
-# Réponse au prompt
-if question:
+if prompt := st.chat_input("Posez votre question..."):
+    # Ajouter message utilisateur à l'historique
+    st.session_state.chat_history.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
+    # Générer la réponse
     with st.spinner("L'IA réfléchit..."):
-        response = chain.invoke(question)  # Passe la question dans un dict
-    st.session_state.chat_history.append((question, response))
+        response = chain.invoke(prompt)
+    # Ajouter réponse à l'historique
+    st.session_state.chat_history.append({"role": "assistant", "content": response})
+    st.chat_message("assistant").write(response)
 
-# Afficher l'historique
-for q, r in st.session_state.chat_history:
-    st.markdown(f"**Vous :** {q}")
-    st.markdown(f"**Assistant IA :** {r}")
-
-# Bouton pour réinitialiser l'historique de conversation
-if st.button("Effacer l'historique de conversation"):
+# Bouton reset
+if st.button("Effacer l'historique de conversation", type="secondary"):
     st.session_state.chat_history = []
-    st.experimental_rerun()
-
+    st.rerun()

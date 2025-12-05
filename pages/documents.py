@@ -7,29 +7,77 @@ import streamlit as st
 from utils.documents_manager import delete_documents, upload_documents, get_vectordb  # import de get_vectordb
 import random
 
-# Dossiers
+# Dossier où sont stockés les documents
 DOC_DIR = "data/documents"
 
-# Titre de la page
-st.title("Gestion des documents juridiques")
-st.markdown("**Gérer** vos fichiers internes (upload et suppression)")
+# Configuration de la page
+st.set_page_config(page_title="Gestion des Documents", layout="wide")
 
-# Charger la base vectorielle
+# Titre et description de la page
+st.title("📁 Gestionnaire de documents")
+st.markdown("Uploader, lister et supprimer vos documents à la base de données internes.")
+
+# Charger ou créer la base vectorielle
 vectordb = get_vectordb()
 
-# Upload d’un ou plusieurs documents
-uploaded = st.file_uploader("Uploader un fichier (.txt, .csv, .html)", type=["txt","csv","html"], accept_multiple_files=True)
-if uploaded:
-    upload_documents(uploaded, vectordb)
+# Initialiser la liste des documents dans la session si ce n'est pas déjà fait
+if "docs" not in st.session_state:
+    st.session_state.docs = os.listdir(DOC_DIR)
 
-# Liste des documents existants
-st.subheader("Documents existants")
-docs = os.listdir(DOC_DIR)
-st.write(docs if docs else "Aucun document pour le moment.")
+# Bouton-drag pour upload des documents
+st.subheader("📤 Upload des documents")
+# Initialisation du compteur pour uploader
+if "uploader_counter" not in st.session_state:
+    st.session_state.uploader_counter = 0
+# Clé dynamique pour le file_uploader
+uploader_key = f"uploader_{st.session_state.uploader_counter}"
+# Uploader de documents
+uploaded_files = st.file_uploader("Uploader (.txt, .csv, .html)", type=["txt", "csv", "html"],accept_multiple_files=True,key=uploader_key)
+if uploaded_files:
+    files = []
+    for f in uploaded_files:
+        files.append(f)
+    if files:
+        upload_documents(files, vectordb)
+        st.session_state.docs = os.listdir(DOC_DIR)
+        # Incrémenter le compteur pour générer une nouvelle clé permet le reset du uploader
+        st.session_state.uploader_counter += 1
+        st.rerun()  # pour reset le file_uploader et actualiser la liste
 
-# Suppression de documents
-st.subheader("Supprimer des documents")
-to_delete = st.multiselect("Sélectionnez les documents à supprimer", options=docs)
-if st.button("Supprimer la sélection") and to_delete:
-    delete_documents(to_delete, vectordb)  # passer vectordb ici
-    st.success(f"Documents supprimés : {', '.join(to_delete)}")
+# Liste de documents
+st.subheader("📚 Liste des documents existants")
+if st.session_state.docs:
+    for doc in st.session_state.docs:
+        # Choisir une icône selon le type de fichier
+        ext = os.path.splitext(doc)[1].lower()
+        icon = "📄"
+        if ext == ".csv":
+            icon = "📊"
+        elif ext == ".html":
+            icon = "🌐"
+        # Créer deux colonnes : une pour le nom, une pour le bouton
+        col1, col2 = st.columns([8, 1])
+        with col1:
+            st.write(f"{icon} {doc}")
+        with col2:
+            if st.button("🗑️", key=f"del_{doc}", help="Supprimer ce document"):
+                # Supprimer le document de la base et du disque
+                delete_documents([doc], vectordb)
+                # Mettre à jour la liste
+                st.session_state.docs = os.listdir(DOC_DIR)
+                # Rafraîchir la page
+                st.rerun()
+else:
+    # Si aucun document n'existe
+    st.info("Aucun document pour le moment.")
+
+# Boutons pour supprimer tous les fichiers de la base de données
+st.markdown("---")
+if st.button("🗑️ Supprimer tous les documents", key="delete_all"):
+    # Supprimer tous les fichiers un par un
+    for doc in st.session_state.docs:
+        delete_documents([doc], vectordb)
+    # Mettre à jour la liste
+    st.session_state.docs = os.listdir(DOC_DIR)
+    # Rafraîchir la page
+    st.rerun()
