@@ -70,27 +70,7 @@ def vectorize_all_documents(vectordb):
     else:
         logging.info("Aucun nouveau document à vectoriser")
 
-# Ajoute un document à la base vectorielle
-def add_document_to_vectordb(file_path: str, vectordb):
-    raw = load_and_preprocess(file_path)
-    if not raw.strip():
-        logging.warning(f"Document {file_path} vide, ignoré")
-        return
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    docs = splitter.create_documents([raw])
-    for doc in docs:
-        doc.metadata['source'] = os.path.basename(file_path)
-    vectordb.add_documents(docs)
-    vectordb.persist()
-    logging.info(f"Document {file_path} ajouté à la base vectorielle")
-
-# Supprime un document de la base vectorielle
-def remove_document_from_vectordb(file_name: str, vectordb):
-    vectordb.delete(where={"source": file_name})
-    vectordb.persist()
-    logging.info(f"Document {file_name} supprimé de la base vectorielle")
-
-# Upload d’un fichier (copie + vectorisation)
+# Upload d’un fichier 
 def upload_documents(uploaded_files, vectordb):
     os.makedirs(DOC_DIR, exist_ok=True)
     for uploaded_file in uploaded_files:
@@ -101,13 +81,11 @@ def upload_documents(uploaded_files, vectordb):
         with open(file_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
         logging.info(f"Fichier {uploaded_file.name} ajouté au dossier")
-        add_document_to_vectordb(file_path, vectordb)
 
-# Suppression d’un ou plusieurs fichiers
+# Suppression d’un ou plusieurs fichier
 def delete_documents(filenames, vectordb):
     for file_name in filenames:
         path = os.path.join(DOC_DIR, file_name)
         if os.path.exists(path):
             os.remove(path)
             logging.info(f"Fichier {file_name} supprimé du dossier")
-        remove_document_from_vectordb(file_name, vectordb)

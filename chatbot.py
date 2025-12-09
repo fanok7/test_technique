@@ -19,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Charge ou crée la base vectorielle
+# Charge ou crée la base vectoriell
 vectordb = get_vectordb()    
 # Vectorise automatiquement les nouveaux documents
 vectorize_all_documents(vectordb)    
@@ -33,7 +33,7 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Charger la chaîne RAG
-chain = load_rag_chain(db_path="data/vectordb")
+chain = load_rag_chain()
 
 # Affichage de l'historique
 for msg in st.session_state.chat_history:
