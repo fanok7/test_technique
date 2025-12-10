@@ -111,5 +111,4 @@ def add_document_to_vectordb(file_path: str):
     for doc in docs:
         doc.metadata['source'] = os.path.basename(file_path)
     vectordb.add_documents(docs)
-    vectordb.persist()
     logging.info(f"Document {file_path} ajouté à la base vectorielle")
