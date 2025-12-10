@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement
 load_dotenv()
 
-# Configuration de la page (doit être la première commande Streamlit)
+# Configuration de la page 
 st.set_page_config(
     page_title="Collaborateur IA Juridique",
     page_icon="⚖️",

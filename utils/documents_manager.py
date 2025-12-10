@@ -49,7 +49,7 @@ def get_vectordb():
     os.makedirs(DB_DIR, exist_ok=True)
     return Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
 
-# Vectorise tous les documents du dossier DOC_DIR qui ne sont pas encore indexés
+# Vectorise tous les documents du dossier DOC_DIR
 def vectorize_all_documents():
     # Fichiers déjà indexés
     vectordb=get_vectordb()
@@ -93,6 +93,7 @@ def delete_documents(filenames):
         if os.path.exists(path):
             os.remove(path)
             logging.info(f"Fichier {file_name} supprimé du dossier")
+        remove_document_from_vectordb(file_name)
         # Supprime un document de la base vectorielle
 
 def remove_document_from_vectordb(file_name: str):
@@ -100,7 +101,7 @@ def remove_document_from_vectordb(file_name: str):
     vectordb.delete(where={"source": file_name})
     logging.info(f"Document {file_name} supprimé de la base vectorielle")
 
-def add_document_to_vectordb(file_path: str):
+def add_document_to_vectordb(file_path):
     vectordb=get_vectordb()
     raw = load_and_preprocess(file_path)
     if not raw.strip():
