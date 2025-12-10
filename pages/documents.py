@@ -4,7 +4,7 @@ Page pour la gestion des documents juridiques - Deuxième Page
 
 import os
 import streamlit as st
-from utils.documents_manager import delete_documents, upload_documents, get_vectordb  # import de get_vectordb
+from utils.documents_manager import delete_documents, upload_documents 
 import random
 
 # Dossier où sont stockés les documents
@@ -16,9 +16,6 @@ st.set_page_config(page_title="Gestion des Documents", layout="wide")
 # Titre et description de la page
 st.title("📁 Gestionnaire de documents")
 st.markdown("Uploader, lister et supprimer des documents dans la base de données interne")
-
-# Charger ou créer la base vectorielle
-vectordb = get_vectordb()
 
 # Initialiser la liste des documents dans la session si ce n'est pas déjà fait
 if "docs" not in st.session_state:
@@ -38,7 +35,7 @@ if uploaded_files:
     for f in uploaded_files:
         files.append(f)
     if files:
-        upload_documents(files, vectordb)
+        upload_documents(files)
         st.session_state.docs = os.listdir(DOC_DIR)
         # Incrémenter le compteur pour générer une nouvelle clé permet le reset du uploader
         st.session_state.uploader_counter += 1
@@ -62,7 +59,7 @@ if st.session_state.docs:
         with col2:
             if st.button("🗑️", key=f"del_{doc}", help="Supprimer ce document"):
                 # Supprimer le document de la base et du disque
-                delete_documents([doc], vectordb)
+                delete_documents([doc])
                 # Mettre à jour la liste
                 st.session_state.docs = os.listdir(DOC_DIR)
                 # Rafraîchir la page
@@ -76,7 +73,7 @@ st.markdown("---")
 if st.button("🗑️ Supprimer tous les documents", key="delete_all"):
     # Supprimer tous les fichiers un par un
     for doc in st.session_state.docs:
-        delete_documents([doc], vectordb)
+        delete_documents([doc])
     # Mettre à jour la liste
     st.session_state.docs = os.listdir(DOC_DIR)
     # Rafraîchir la page

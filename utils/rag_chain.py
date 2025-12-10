@@ -9,15 +9,17 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts.chat import ChatPromptTemplate     
 from langchain_openai import OpenAIEmbeddings                  
 from dotenv import load_dotenv
+from utils.documents_manager import get_vectordb
 
 # Chargement des variables d'environnement
 load_dotenv()
 
-def load_rag_chain(db_path="data/vectordb"):
+def load_rag_chain():
     # Création du modèle d'embeddings
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     # Création du retriever Chroma
-    retriever = Chroma(persist_directory=db_path,embedding_function=embeddings).as_retriever(search_kwargs={"k": 4})
+    vectordb = get_vectordb()
+    retriever = vectordb.as_retriever(search_kwargs={"k": 4})
     # Définition du template de prompt pour le LLM
     template = """Tu es un assistant juridique. Répond à la QUESTION uniquement selon le CONTEXTE.
     Si l'information n'est pas présente, dis : "information non trouvée".

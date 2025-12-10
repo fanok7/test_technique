@@ -4,7 +4,7 @@ Programme principal et chatbot RAG - Première page
 
 import streamlit as st
 import os
-from utils.documents_manager import get_vectordb, vectorize_all_documents
+from utils.documents_manager import vectorize_all_documents, reset_vectordb
 from utils.rag_chain import load_rag_chain
 from dotenv import load_dotenv
 
@@ -19,11 +19,13 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Charge ou crée la base vectoriell
-vectordb = get_vectordb()    
-# Vectorise automatiquement les nouveaux documents
-vectorize_all_documents(vectordb)    
-
+# On détecte la première exécution 
+if "initialized" not in st.session_state:
+    reset_vectordb()     # 💥 Supprime complètement l'ancienne base
+    # Vectorise automatiquement les documents actuels
+    vectorize_all_documents() 
+    st.session_state.initialized = True
+   
 # Titre de la page
 st.title("💼 Collaborateur Juridique RAG")
 st.markdown("Poser des questions au chatbot basé sur les documents internes")

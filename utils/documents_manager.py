@@ -6,6 +6,7 @@ import os
 import logging
 import pandas as pd
 import re
+import shutil
 from bs4 import BeautifulSoup
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -37,6 +38,10 @@ def load_and_preprocess(file_path: str) -> str:
         if ext in [".html", ".htm"]:
             return clean_text(raw)
         return raw.strip()
+    
+def reset_vectordb():
+    if os.path.exists(DB_DIR):
+        shutil.rmtree(DB_DIR)
 
 # Charger ou créer la base vectorielle
 def get_vectordb():
@@ -45,9 +50,9 @@ def get_vectordb():
     return Chroma(persist_directory=DB_DIR, embedding_function=embeddings)
 
 # Vectorise tous les documents du dossier DOC_DIR qui ne sont pas encore indexés
-def vectorize_all_documents(vectordb):
-    os.makedirs(DOC_DIR, exist_ok=True)
+def vectorize_all_documents():
     # Fichiers déjà indexés
+    vectordb=get_vectordb()
     existing_docs = {meta['source'] for meta in vectordb._collection.get()['metadatas'] if 'source' in meta}
     docs_to_add = []
     for file_name in os.listdir(DOC_DIR):
@@ -65,13 +70,10 @@ def vectorize_all_documents(vectordb):
         docs_to_add.extend(file_docs)
     if docs_to_add:
         vectordb.add_documents(docs_to_add)
-        vectordb.persist()
         logging.info(f"{len(docs_to_add)} documents vectorisés en batch")
-    else:
-        logging.info("Aucun nouveau document à vectoriser")
 
 # Upload d’un fichier 
-def upload_documents(uploaded_files, vectordb):
+def upload_documents(uploaded_files):
     os.makedirs(DOC_DIR, exist_ok=True)
     for uploaded_file in uploaded_files:
         file_path = os.path.join(DOC_DIR, uploaded_file.name)
@@ -81,11 +83,33 @@ def upload_documents(uploaded_files, vectordb):
         with open(file_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
         logging.info(f"Fichier {uploaded_file.name} ajouté au dossier")
+        add_document_to_vectordb(file_path)
 
-# Suppression d’un ou plusieurs fichier
-def delete_documents(filenames, vectordb):
+# Suppression d’un ou plusieurs fichiers
+def delete_documents(filenames):
+    os.makedirs(DOC_DIR, exist_ok=True)
     for file_name in filenames:
         path = os.path.join(DOC_DIR, file_name)
         if os.path.exists(path):
             os.remove(path)
             logging.info(f"Fichier {file_name} supprimé du dossier")
+        # Supprime un document de la base vectorielle
+
+def remove_document_from_vectordb(file_name: str):
+    vectordb=get_vectordb()
+    vectordb.delete(where={"source": file_name})
+    logging.info(f"Document {file_name} supprimé de la base vectorielle")
+
+def add_document_to_vectordb(file_path: str):
+    vectordb=get_vectordb()
+    raw = load_and_preprocess(file_path)
+    if not raw.strip():
+        logging.warning(f"Document {file_path} vide, ignoré")
+        return
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    docs = splitter.create_documents([raw])
+    for doc in docs:
+        doc.metadata['source'] = os.path.basename(file_path)
+    vectordb.add_documents(docs)
+    vectordb.persist()
+    logging.info(f"Document {file_path} ajouté à la base vectorielle")
